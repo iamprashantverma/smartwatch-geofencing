@@ -19,10 +19,7 @@ def detect_zone(latitude: float, longitude: float) -> Optional[str]:
     return None
 
 
-def detect_zone_event(
-    previous_zone: Optional[str],
-    current_zone: Optional[str]
-) -> Optional[ZoneEvent]:
+def detect_zone_event(previous_zone: Optional[str], current_zone: Optional[str]) -> Optional[ZoneEvent]:
 
     # Entered a zone
     if previous_zone is None and current_zone is not None:
