@@ -174,9 +174,9 @@ def evaluate_device_event(db: Session, payload: DeviceDataSchema, current_zone: 
 
     
     
-    if settings.AI_EXPLANATION:
+    if settings.AI_EXPLANATION is True:
         ai_result = generate_ai_explanation(event_log=event_log)
-    if (settings.AI_EXPLANATION):
+    if (settings.AI_EXPLANATION is True):
         event_log.ai_explanation = ai_result
 
     db.add(event_log)
