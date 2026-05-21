@@ -71,103 +71,107 @@ def get_summary_report(db: Session):
         "zone_activity": zone_activity
     }
 
-# Evaluate device event and store evaluation log
-def evaluate_device_event( db: Session, payload: DeviceDataSchema, current_zone: str, event_type: str):
+def evaluate_device_event(db: Session, payload: DeviceDataSchema, current_zone: str, event_type: str):
 
-    evaluation_result = None
+    hr, steps, zone = payload.heart_rate, payload.steps, current_zone
 
-    if current_zone is not None:
-        # Critical: Restricted zone + high heart rate
-        if (
-            payload.heart_rate > 120 and current_zone == "Restricted Zone" ):
-            evaluation_result = {
-                "event": "High Heart Rate in Restricted Zone",
-                "severity": "High",
-                "status": "Flagged",
-                "reason": "Heart rate exceeded threshold inside restricted zone"
-            }
+    evaluation_result = {
+        "event": f"Normal Activity in {zone}",
+        "severity": "Info",
+        "status": "OK",
+        "reason": "Heart rate within normal range AND activity level normal"
+    }
 
-        # High activity in research lab
-        elif ( payload.steps > 10000 and current_zone == "Research Lab Zone"):
-            evaluation_result = {
-                "event": "Unusual Activity in Research Lab",
-                "severity": "Medium",
-                "status": "Monitor",
-                "reason": "High movement detected inside research lab"
-            }
+    if zone == "OUTSIDE":
 
-        # Entry into restricted zone
-        elif ( event_type == "ENTRY" and current_zone == "Restricted Zone"):
-            evaluation_result = {
-                "event": "Restricted Zone Entry",
-                "severity": "Medium",
-                "status": "Flagged",
-                "reason": "Device entered restricted zone"
-            }
-
-        # Low activity in warehouse
-        elif (payload.steps < 50 and current_zone == "Warehouse Zone" ):
-            evaluation_result = {
-                "event": "Low Activity in Warehouse",
-                "severity": "Low",
-                "status": "Monitor",
-                "reason": "Very low movement detected in warehouse zone"
-            }
-
-        # Elevated heart rate in office
-        elif (payload.heart_rate > 100 and current_zone == "Office Zone"):
-            evaluation_result = {
-                "event": "Elevated Heart Rate in Office",
-                "severity": "Low",
-                "status": "Warning",
-                "reason": "Heart rate above normal office threshold"
-            }
-
-        # Parking zone entry
-        elif (event_type == "ENTRY" and current_zone == "Parking Zone"):
-            evaluation_result = {
-                "event": "Parking Zone Entry",
-                "severity": "Low",
-                "status": "Info",
-                "reason": "Device entered parking zone"
-            }
-    # CASE 2: OUTSIDE ALL ZONES
-    else:
-        # High heart rate outside geofence
-        if payload.heart_rate > 120:
+        if hr > 120:
             evaluation_result = {
                 "event": "High Heart Rate Outside Zone",
                 "severity": "Medium",
                 "status": "Warning",
-                "reason": "Heart rate > 120 but device is outside all geofences"
+                "reason": "Heart rate > 120 AND outside all geofences"
             }
 
-        # Very low activity outside geofence
-        elif payload.steps < 50:
+        elif steps < 50:
             evaluation_result = {
                 "event": "Inactive Device Outside Zone",
                 "severity": "Low",
                 "status": "Monitor",
-                "reason": "Low movement detected outside geofences"
+                "reason": "Steps < 50 AND outside all geofences"
             }
 
-    # STORE EVENT IN DB
-    if evaluation_result:
+    else:
 
-        event_log = EventLog(
-            device_id=payload.device_id,
-            event_type=evaluation_result["event"],
-            severity=evaluation_result["severity"],
-            status=evaluation_result["status"],
-            zone=current_zone,
-            reason=evaluation_result["reason"],
-            heart_rate=payload.heart_rate,
-            latitude=payload.location.lat,
-            longitude=payload.location.lng
-        )
+        if hr > 140:
+            evaluation_result = {
+                "event": "Emergency Heart Rate Detected",
+                "severity": "Critical",
+                "status": "Emergency",
+                "reason": "Heart rate > 140 AND abnormal physiological condition detected"
+            }
 
-        db.add(event_log)
-        db.commit()
-        db.refresh(event_log)
+        elif hr > 120 and zone == "Restricted Zone":
+            evaluation_result = {
+                "event": "Critical Health Risk in Restricted Zone",
+                "severity": "High",
+                "status": "Alert",
+                "reason": "Heart rate > 120 AND inside restricted zone"
+            }
+
+        elif steps > 10000 and zone == "Research Lab Zone":
+            evaluation_result = {
+                "event": "Unusual High Activity in Research Lab",
+                "severity": "Medium",
+                "status": "Monitor",
+                "reason": "Steps > 10000 AND inside research lab zone"
+            }
+
+        elif event_type == "ENTRY" and zone == "Restricted Zone":
+            evaluation_result = {
+                "event": "Restricted Zone Entry",
+                "severity": "Medium",
+                "status": "Flagged",
+                "reason": "Event = ENTRY AND zone = Restricted Zone"
+            }
+
+        elif hr > 100 and zone == "Office Zone":
+            evaluation_result = {
+                "event": "Elevated Heart Rate in Office",
+                "severity": "Low",
+                "status": "Warning",
+                "reason": "Heart rate > 100 AND inside office zone"
+            }
+
+        elif steps < 50 and zone == "Warehouse Zone":
+            evaluation_result = {
+                "event": "Low Activity in Warehouse",
+                "severity": "Low",
+                "status": "Monitor",
+                "reason": "Steps < 50 AND inside warehouse zone"
+            }
+
+        elif event_type == "ENTRY" and zone == "Parking Zone":
+            evaluation_result = {
+                "event": "Parking Zone Entry",
+                "severity": "Info",
+                "status": "OK",
+                "reason": "Event = ENTRY AND inside parking zone"
+            }
+
+    event_log = EventLog(
+        device_id=payload.device_id,
+        event=evaluation_result["event"],
+        severity=evaluation_result["severity"],
+        status=evaluation_result["status"],
+        zone=zone,
+        reason=evaluation_result["reason"],
+        heart_rate=hr,
+        latitude=payload.location.lat,
+        longitude=payload.location.lng
+    )
+
+    db.add(event_log)
+    db.commit()
+    db.refresh(event_log)
 
     return evaluation_result

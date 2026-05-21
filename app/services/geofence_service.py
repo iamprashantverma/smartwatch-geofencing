@@ -16,7 +16,7 @@ def detect_zone(latitude: float, longitude: float) -> Optional[str]:
         if distance <= zone["radius"]:
             return zone["name"]
 
-    return None
+    return "OUTSIDE_ZONE"
 
 
 def detect_zone_event(previous_zone: Optional[str], current_zone: Optional[str]) -> Optional[ZoneEvent]:
@@ -37,4 +37,4 @@ def detect_zone_event(previous_zone: Optional[str], current_zone: Optional[str])
     if previous_zone != current_zone and current_zone is not None:
         return ZoneEvent.ENTRY
 
-    return None
+    return ZoneEvent.OUTSIDE

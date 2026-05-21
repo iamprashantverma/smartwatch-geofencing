@@ -15,3 +15,4 @@ class ZoneEvent(str, Enum):
     ENTRY = "ENTRY"
     EXIT = "EXIT"
     STAY = "STAY"
+    OUTSIDE ="OUTSIDE"
