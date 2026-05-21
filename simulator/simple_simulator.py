@@ -74,7 +74,7 @@ def run():
             for device_id in device_ids:
                 data = generate_data(device_id)
                 try:
-                    response = requests.post(url, json=data, timeout=5)
+                    response = requests.post(url, json=data, timeout=240)
                     if response.status_code in [200, 201]:
                         result = response.json()
                         event = result.get("data", {}).get("event_type", "None")
