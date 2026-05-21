@@ -134,7 +134,6 @@ The API will be available at:
 
 - `http://localhost:8000`
 - Swagger UI: `http://localhost:8000/docs`
-- OpenAPI schema: `http://localhost:8000/openapi.json`
 
 ### 7. Run Simulator
 
