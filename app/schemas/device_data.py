@@ -13,3 +13,4 @@ class DeviceDataSchema(BaseModel):
     steps: int = Field(..., ge=0, description="Steps cannot be negative")
     location: LocationSchema
     timestamp: datetime
+    event_type: str | None = Field(None, description="Event type: ENTRY, EXIT, STAY, or None")
