@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 
 from app.models.event_log import EventLog
 from app.schemas.device_data import DeviceDataSchema
+from app.core.config import settings
+from app.services.ai_service_evaluation import generate_ai_explanation
 
 # Get all events
 def get_all_events(db: Session):
@@ -169,6 +171,13 @@ def evaluate_device_event(db: Session, payload: DeviceDataSchema, current_zone: 
         latitude=payload.location.lat,
         longitude=payload.location.lng
     )
+
+    
+    
+    if settings.AI_EXPLANATION:
+        ai_result = generate_ai_explanation(event_log=event_log)
+    if (settings.AI_EXPLANATION):
+        event_log.ai_explanation = ai_result
 
     db.add(event_log)
     db.commit()
