@@ -16,5 +16,6 @@ class DeviceData(Base):
     longitude = Column(Float, nullable=False)
 
     zone = Column(String(50), nullable=True)
+    event_type = Column(String(20), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())

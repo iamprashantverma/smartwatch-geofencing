@@ -8,22 +8,16 @@ class EventLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    device_id = Column(String, nullable=False)
+    device_id = Column(String(100), nullable=False)
+    event = Column(String(200), nullable=False)
 
-    event_type = Column(String, nullable=False)
-
-    severity = Column(String, nullable=True)
-
-    status = Column(String, nullable=True)
-
-    zone = Column(String, nullable=True)
-
-    reason = Column(String, nullable=True)
+    severity = Column(String(20), nullable=True)
+    status = Column(String(20), nullable=True)
+    zone = Column(String(50), nullable=True)
+    reason = Column(String(500), nullable=True)
 
     heart_rate = Column(Integer, nullable=True)
-
     latitude = Column(Float, nullable=True)
-
     longitude = Column(Float, nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
