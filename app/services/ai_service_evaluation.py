@@ -22,10 +22,10 @@ RULES:
                 "prompt": prompt,
                 "stream": False,
                 "options": {
-                    "temperature": 0.3,      # low = focused, no hallucination
+                    "temperature": 0.3,     
                     "top_p": 0.85,
-                    "num_predict": 60,       # hard cap prevents rambling
-                    "stop": [".", "\n"]      # stop after first sentence
+                    "num_predict": 60,      
+                    "stop": [".", "\n"]      
                 }
             },
             timeout=30
