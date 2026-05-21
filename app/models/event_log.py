@@ -19,5 +19,5 @@ class EventLog(Base):
     heart_rate = Column(Integer, nullable=True)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
-
+    ai_explanation = Column(String(500), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
